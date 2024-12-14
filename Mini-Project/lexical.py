@@ -22,8 +22,8 @@ def t_STRING(t):
     return t
 
 def t_STEREO(t):
-    r"<< [a-zA-Z_][a-zA-Z_0-9] *>>"
-    t.value=t.value[3:-3]
+    r"<<[a-zA-Z_][a-zA-Z_0-9]*>>"
+    t.value=t.value[2:-2]
     return t
 
 def t_ID(t):
