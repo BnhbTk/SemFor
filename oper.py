@@ -16,7 +16,7 @@ class Expression:
     def node2gv(self,counter,output) -> int:
         pass
     
-    def semantic(self,state):
+    def semantic(self,state:dict[str,int|bool]) -> int|bool:
         raise NotImplementedError()
 
 class ArithmeticExpression(Expression):
@@ -31,7 +31,7 @@ class IntConstant(ArithmeticExpression):
         output.append(f'Node{counter.count} [label="Const({self.value})" shape=oval style=filled fillcolor=lightgreen]')
         return counter.count
     
-    def semantic(self,state):
+    def semantic(self,state:dict[str,int|bool]) -> int:
         return self.value
     
 
@@ -40,7 +40,7 @@ class IntVariable(ArithmeticExpression):
     def __init__(self,name) -> None:
         self.name=name
     
-    def semantic(self,state):
+    def semantic(self,state:dict[str,int|bool]) -> int:
         return state[self.name]
     
     def node2gv(self,counter,output):
@@ -54,7 +54,7 @@ class UnaryIntOperator(ArithmeticExpression):
         self.op=op
         self.operand=operand
     
-    def semantic(self,state):
+    def semantic(self,state:dict[str,int|bool]) -> int:
         if self.op=="-":
             return -self.operand.semantic(state)
         else:
@@ -77,7 +77,7 @@ class BinaryIntOperator(ArithmeticExpression):
         self.operand1=operand1
         self.operand2=operand2
     
-    def semantic(self, state):
+    def semantic(self, state:dict[str,int|bool]) -> int:
         match self.op:
             case "+":
                 return self.operand1.semantic(state)+self.operand2.semantic(state)
@@ -108,7 +108,7 @@ class BooleanConstant(BooleanExpression):
     def __init__(self,value):
         self.value = value
     
-    def semantic(self, state):
+    def semantic(self, state:dict[str,int|bool]) -> bool:
         return self.value
     
     def node2gv(self,counter,output):
@@ -120,7 +120,7 @@ class BooleanVariable(BooleanExpression):
     def __init__(self,name):
         self.name = name
     
-    def semantic(self, state):
+    def semantic(self, state:dict[str,int|bool]) -> bool:
         return state[self.name]
     
     def node2gv(self,counter,output):
@@ -142,7 +142,7 @@ class UnaryBooleanOperator(BooleanExpression):
         output.append(f'Node{v} -> Node{child}')
         return v
     
-    def semantic(self, state):
+    def semantic(self, state:dict[str,int|bool]) -> bool:
         if self.op=="!":
             return not self.operand.semantic(state)
 
@@ -152,7 +152,7 @@ class BinaryBooleanOperator(BooleanExpression):
         self.operand1 = operand1
         self.operand2 = operand2
     
-    def semantic(self, state):
+    def semantic(self, state:dict[str,int|bool]) -> bool:
         match self.op:
             case "and":
                 return self.operand1.semantic(state) and self.operand2.semantic(state)
@@ -177,7 +177,7 @@ class CompareIntegerOperator(BooleanExpression):
         self.operand1 = operand1
         self.operand2 = operand2
     
-    def semantic(self, state):
+    def semantic(self, state:dict[str,int|bool]) -> bool:
         match self.op:
             case "==":
                 return self.operand1.semantic(state) == self.operand2.semantic(state)
@@ -210,7 +210,7 @@ class Instruction:
     def node2gv(self,counter,output):
         pass
     
-    def semantic(self,state:dict[str,int]) -> dict[str,int]:
+    def semantic(self,state:dict[str,int|bool]) -> dict[str,int|bool]:
         raise NotImplementedError()
 
 class Assign(Instruction):
@@ -218,7 +218,7 @@ class Assign(Instruction):
         self.var=var
         self.expression=expression
     
-    def semantic(self, state):
+    def semantic(self, state:dict[str,int|bool]) -> dict[str,int|bool]:
         state[self.var]=self.expression.semantic(state)
         return state
     
@@ -241,7 +241,7 @@ class Skip(Instruction):
         output.append(f'Node{v} [label="Skip" style="filled,rounded" shape=box fillcolor=lightblue]')
         return counter.count
     
-    def semantic(self,state:dict[str,int]) -> dict[str,int]:
+    def semantic(self, state:dict[str,int|bool]) -> dict[str,int|bool]:
         return state
 
 class Sequence(Instruction):
@@ -249,7 +249,7 @@ class Sequence(Instruction):
         self.first=first
         self.second=second
     
-    def semantic(self,state:dict[str,int]) -> dict[str,int]:
+    def semantic(self, state:dict[str,int|bool]) -> dict[str,int|bool]:
         return self.second.semantic(self.first.semantic(state))
     
     def node2gv(self,counter,output):
@@ -269,7 +269,7 @@ class If(Instruction):
         self.positive=positive
         self.negative=negative
     
-    def semantic(self,state:dict[str,int]) -> dict[str,int]:
+    def semantic(self, state:dict[str,int|bool]) -> dict[str,int|bool]:
         if self.cdt.semantic(state):
             return self.positive.semantic(state)
         else:
@@ -294,7 +294,7 @@ class While(Instruction):
         self.cdt=cdt
         self.internal=internal
     
-    def semantic(self, state):
+    def semantic(self, state:dict[str,int|bool]) -> dict[str,int|bool]:
         while self.cdt.semantic(state):
             state=self.internal.semantic(state)
         return state
