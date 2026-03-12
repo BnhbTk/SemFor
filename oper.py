@@ -86,7 +86,7 @@ class BinaryIntOperator(ArithmeticExpression):
             case "*":
                 return self.operand1.operational_semantic(state)*self.operand2.operational_semantic(state)
             case "/":
-                return self.operand1.operational_semantic(state)/self.operand2.operational_semantic(state)
+                return self.operand1.operational_semantic(state)//self.operand2.operational_semantic(state)
             case _:
                 raise NotImplementedError()
     
